@@ -14,40 +14,41 @@ const connectedUsersMap = new Map<
 >();
 
 wss.on("connection", function connection(socket, req) {
-
-
   const params = url.parse(req.url!, true);
   const userId = params.query["userid"];
   const clubId = params.query["clubid"];
 
-
   if (!userId || Array.isArray(userId) || Array.isArray(clubId)) {
     return;
   }
-
 
   storeUserConnection(userId, clubId || "", socket);
 
   socket.on("error", console.error);
 
   socket.on("message", function message(data, isBinary) {
-
     // converting the Buffer data to JSON string
     const jsonString = data.toString("utf-8");
-    const jsonData  = JSON.parse(jsonString);
+    const jsonData = JSON.parse(jsonString);
+
+    if (jsonData.type === "ping") {
+      socket.send(JSON.stringify({ type: "pong" }));
+
+      return;
+    }
+
     const clubId = jsonData.data.clubId;
 
-    // Getting the WS clients for the club id we received and the sending the data to only required users not all
+    // Getting the WS clients for the club id we received and  sending the data to only required users not all
     getWSForReceivedClubId(clubId || "").forEach((client) => {
       if (client !== socket && client.readyState === WebSocket.OPEN) {
         client.send(data, { binary: isBinary });
       }
     });
-
   });
 
   socket.on("close", () => {
-    socket.close();
+    console.log("closing connection");
   });
 });
 
@@ -62,11 +63,9 @@ function storeUserConnection(
   connectedUsersMap.set(userId, { clubid: clubId || "", wsClient: wsSocket });
 }
 
-
-// getting the ws clients for the clubid 
+// getting the ws clients for the clubid
 
 function getWSForReceivedClubId(clubId: string): WebSocket[] {
-
   const wsArray: WebSocket[] = [];
 
   connectedUsersMap.forEach((value) => {
