@@ -16,13 +16,13 @@ const connectedUsersMap = new Map<
 wss.on("connection", function connection(socket, req) {
   const params = url.parse(req.url!, true);
   const userId = params.query["userid"];
-  const clubId = params.query["clubid"];
 
-  if (!userId || Array.isArray(userId) || Array.isArray(clubId)) {
+
+  if (!userId || Array.isArray(userId) ) {
     return;
   }
 
-  storeUserConnection(userId, clubId || "", socket);
+  storeUserConnection(userId,  "", socket);
 
   socket.on("error", console.error);
 
@@ -37,7 +37,16 @@ wss.on("connection", function connection(socket, req) {
       return;
     }
 
-    const clubId = jsonData.data.clubId;
+    if (jsonData.type === "club-change") {
+      const userId = jsonData.userId;
+      const clubId = jsonData.clubId;
+      const wsSocket = getWsClientForAUser(userId);
+      storeUserConnection(userId, clubId || "", wsSocket);
+
+      return;
+    }
+
+    const clubId = jsonData.data?.clubId;
 
     // Getting the WS clients for the club id we received and  sending the data to only required users not all
     getWSForReceivedClubId(clubId || "").forEach((client) => {
@@ -75,4 +84,10 @@ function getWSForReceivedClubId(clubId: string): WebSocket[] {
   });
 
   return wsArray;
+}
+
+function getWsClientForAUser(userId: string): WebSocket {
+  const userWsSocketObj = connectedUsersMap.get(userId)!;
+
+  return userWsSocketObj.wsClient;
 }
