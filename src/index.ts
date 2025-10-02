@@ -1,4 +1,4 @@
-import express, { json } from "express";
+import express from "express";
 import { WebSocket, WebSocketServer } from "ws";
 import url from "url";
 
@@ -17,12 +17,11 @@ wss.on("connection", function connection(socket, req) {
   const params = url.parse(req.url!, true);
   const userId = params.query["userid"];
 
-
-  if (!userId || Array.isArray(userId) ) {
+  if (!userId || Array.isArray(userId)) {
     return;
   }
 
-  storeUserConnection(userId,  "", socket);
+  storeUserConnection(userId, "", socket);
 
   socket.on("error", console.error);
 
@@ -30,6 +29,8 @@ wss.on("connection", function connection(socket, req) {
     // converting the Buffer data to JSON string
     const jsonString = data.toString("utf-8");
     const jsonData = JSON.parse(jsonString);
+
+    console.log("Received: ", jsonData);
 
     if (jsonData.type === "ping") {
       socket.send(JSON.stringify({ type: "pong" }));
@@ -58,6 +59,7 @@ wss.on("connection", function connection(socket, req) {
 
   socket.on("close", () => {
     console.log("closing connection");
+    removeUserConnection(userId);
   });
 });
 
@@ -90,4 +92,10 @@ function getWsClientForAUser(userId: string): WebSocket {
   const userWsSocketObj = connectedUsersMap.get(userId)!;
 
   return userWsSocketObj.wsClient;
+}
+
+// This function removes the stale user if connection is closed
+function removeUserConnection(userId:string){
+  connectedUsersMap.delete(userId);
+
 }
