@@ -58,6 +58,7 @@ wss.on("connection", function connection(socket, req) {
   });
 
   socket.on("close", () => {
+ 
     console.log("closing connection");
     removeUserConnection(userId);
   });
