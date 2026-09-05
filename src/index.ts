@@ -4,7 +4,7 @@ import url from "url";
 
 const app = express();
 
-const port = Number.parseInt(process.env.PORT ?? "8080", 10);
+const port = Number.parseInt(process.env.PORT ?? "8081", 10);
 
 // Used by Coolify to determine whether the container is ready to receive
 // connections. It is also useful when checking the service outside of a

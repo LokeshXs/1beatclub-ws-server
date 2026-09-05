@@ -14,12 +14,12 @@ FROM node:20-alpine AS production
 
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=8080
+ENV PORT=8081
 
 COPY --from=build /app/package.json ./
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 
-EXPOSE 8080
+EXPOSE 8081
 
 CMD ["node", "dist/index.js"]
