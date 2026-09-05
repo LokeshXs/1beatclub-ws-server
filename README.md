@@ -63,6 +63,22 @@ WebSocket server starts on:
 ws://localhost:8080
 ```
 
+## ☁️ Deploy with Coolify
+
+This repository includes a `Dockerfile`, so select **Dockerfile** as the build
+pack when creating the application in Coolify.
+
+1. Create an Application from this Git repository and select the deployment
+   branch (for example, `main`).
+2. Set the Dockerfile location to `Dockerfile` and set the exposed port to
+   `8080`.
+3. Add a domain such as `ws.example.com`. Coolify provisions TLS, so clients
+   should connect with `wss://ws.example.com/?userid=<user-id>`.
+4. Enable a health check with path `/health` and port `8080`, then deploy.
+
+The server honors the `PORT` environment variable. Leave it at `8080` unless
+you also update Coolify's exposed port and health-check port to match.
+
 ---
 
 ## 📌 Important Notes

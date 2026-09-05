@@ -4,7 +4,18 @@ import url from "url";
 
 const app = express();
 
-const httpServer = app.listen(8080);
+const port = Number.parseInt(process.env.PORT ?? "8080", 10);
+
+// Used by Coolify to determine whether the container is ready to receive
+// connections. It is also useful when checking the service outside of a
+// WebSocket client.
+app.get("/health", (_req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
+const httpServer = app.listen(port, "0.0.0.0", () => {
+  console.log(`WebSocket server listening on port ${port}`);
+});
 
 const wss = new WebSocketServer({ server: httpServer });
 
